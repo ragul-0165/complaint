@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Complaint Intelligence System</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent: #eff6ff;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            max-width: 700px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            letter-spacing: -0.025em;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            width: 400px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            color: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Custom File Input Styling */
+        .file-upload-wrapper {
+            position: relative;
+            width: 100%;
+            height: 50px;
+            margin-bottom: 20px;
+        }
+
+        .file-upload-input {
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .file-upload-button {
+            width: 100%;
+            height: 100%;
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .file-upload-input:hover + .file-upload-button {
+            background: #e2e8f0;
+            border-color: var(--text-muted);
+        }
+
+        button.btn-primary {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* Result Section Styling */
+        .result-container {
+            margin-top: 50px;
+            width: 100%;
+            max-width: 600px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .result-card {
+            background: #ffffff;
+            border-left: 6px solid var(--primary);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .result-card h2 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            text-align: left;
+        }
+
+        .result-card b {
+            color: var(--primary);
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1.05rem;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fas fa-robot"></i> AI Complaint Intelligence</h1>
+        <p>Automated classification and smart routing of banking and civic issues for faster resolution.</p>
+    </div>
+
+    <div class="container">
+
+        <!-- Text Complaint Card -->
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-comment-alt"></i>
+            </div>
+            <h3>Textual Analysis</h3>
+            <p>Paste your complaint details below. Our NLP engine will identify the department instantly.</p>
+            <form action="/predict_text" method="post" enctype="multipart/form-data" style="width: 100%;">
+                <div class="form-group">
+                    <input type="text" name="text" placeholder="Explain your issue here..." required>
+                </div>
+                <!-- Supporting Docs for Text -->
+                <div class="file-upload-wrapper" style="height: 40px; margin-top: 15px;">
+                    <input type="file" name="docs" class="file-upload-input" id="textDocs">
+                    <div class="file-upload-button" id="textDocsName" style="font-size: 0.8rem; border-style: solid; border-width: 1px;">
+                        <i class="fas fa-paperclip"></i> Support Docs (Optional)
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="margin-top: 10px;">
+                    <i class="fas fa-bolt"></i> Classify Issue
+                </button>
+            </form>
+        </div>
+
+        <!-- Image Complaint Card -->
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-camera"></i>
+            </div>
+            <h3>Visual Evidence</h3>
+            <p>Upload a photo of the incident (Potholes, Graffiti, etc.) for automated civic routing.</p>
+            <form action="/predict_image" method="post" enctype="multipart/form-data" style="width: 100%;">
+                <div class="file-upload-wrapper">
+                    <input type="file" name="image" class="file-upload-input" id="imageInput" required>
+                    <div class="file-upload-button" id="fileName">
+                        <i class="fas fa-cloud-upload-alt" style="margin-right: 10px;"></i> Click to browse or drag photo
+                    </div>
+                </div>
+                <!-- Supporting Docs for Image -->
+                <div class="file-upload-wrapper" style="height: 40px;">
+                    <input type="file" name="docs" class="file-upload-input" id="imageDocs">
+                    <div class="file-upload-button" id="imageDocsName" style="font-size: 0.8rem; border-style: solid; border-width: 1px;">
+                        <i class="fas fa-paperclip"></i> Support Docs (Optional)
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="margin-top: 10px;">
+                    <i class="fas fa-microscope"></i> Analyze Image
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    {% if result %}
+        <div class="result-container">
+            <div class="result-card">
+                <div class="result-title">
+                    <i class="fas fa-clipboard-check text-primary"></i> Analysis Report
+                </div>
+                <!-- Using |safe to render the <b> and <br> tags from backend -->
+                <h2 style="font-size: 1.1rem; line-height: 1.6;">{{ result|safe }}</h2>
+            </div>
+        </div>
+    {% endif %}
+
+    <script>
+        // Update primary image filename
+        document.getElementById('imageInput').onchange = function () {
+            let name = this.files[0] ? this.files[0].name : "Click to browse or drag photo";
+            document.getElementById('fileName').innerHTML = '<i class="fas fa-file-image"></i> ' + name;
+            if(this.files[0]) {
+                document.getElementById('fileName').style.borderColor = '#2563eb';
+                document.getElementById('fileName').style.color = '#2563eb';
+            }
+        };
+
+        // Update secondary doc filename for Text card
+        document.getElementById('textDocs').onchange = function () {
+            let name = this.files[0] ? this.files[0].name : "Support Docs (Optional)";
+            document.getElementById('textDocsName').innerHTML = '<i class="fas fa-paperclip"></i> ' + name;
+            if(this.files[0]) {
+                document.getElementById('textDocsName').style.borderColor = '#2563eb';
+                document.getElementById('textDocsName').style.color = '#2563eb';
+            }
+        };
+
+        // Update secondary doc filename for Image card
+        document.getElementById('imageDocs').onchange = function () {
+            let name = this.files[0] ? this.files[0].name : "Support Docs (Optional)";
+            document.getElementById('imageDocsName').innerHTML = '<i class="fas fa-paperclip"></i> ' + name;
+            if(this.files[0]) {
+                document.getElementById('imageDocsName').style.borderColor = '#2563eb';
+                document.getElementById('imageDocsName').style.color = '#2563eb';
+            }
+        };
+    </script>
+
+</body>
+</html>

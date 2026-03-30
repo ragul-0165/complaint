@@ -1,0 +1,82 @@
+
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# -----------------------------
+# Flask / App
+# -----------------------------
+instance/
+.webassets-cache
+
+# -----------------------------
+# Logs & temp files
+# -----------------------------
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# -----------------------------
+# Jupyter Notebook
+# -----------------------------
+.ipynb_checkpoints/
+
+# -----------------------------
+# ML Models & Large Files
+# -----------------------------
+models/
+*.h5
+*.pkl
+*.joblib
+*.pt
+
+# Datasets (IMPORTANT - yours are large)
+data/
+dataset/
+*.csv
+*.xlsx
+
+# -----------------------------
+# Environment Variables
+# -----------------------------
+.env
+.env.*
+
+# -----------------------------
+# IDEs
+# -----------------------------
+.vscode/
+.idea/
+
+# -----------------------------
+# Node (if frontend used)
+# -----------------------------
+node_modules/
+npm-debug.log*
+
+# -----------------------------
+# Flutter (if used)
+# -----------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+
+# -----------------------------
+# OS files
+# -----------------------------
+Thumbs.db
