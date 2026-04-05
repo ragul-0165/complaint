@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Submitted – {{ complaint_id }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e8f0fe 0%, #e8f5e9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 16px 80px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 16px 48px rgba(26,115,232,0.13);
+            width: 100%;
+            max-width: 700px;
+            overflow: hidden;
+            animation: popIn 0.4s cubic-bezier(.22,.61,.36,1) both;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to   { opacity: 1; transform: scale(1)   translateY(0); }
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+            padding: 36px 40px 32px;
+            text-align: center;
+            color: #fff;
+        }
+        .check-ring {
+            width: 64px; height: 64px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 32px;
+            animation: checkPop 0.5s 0.2s cubic-bezier(.22,.61,.36,1) both;
+        }
+        @keyframes checkPop { from { transform: scale(0); } to { transform: scale(1); } }
+        .hero h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+        .hero p  { font-size: 13px; opacity: 0.85; }
+
+        /* Complaint ID Strip */
+        .id-strip {
+            background: #f8f9ff;
+            border-top: 3px solid #4285f4;
+            border-bottom: 3px solid #4285f4;
+            padding: 20px 40px;
+            text-align: center;
+        }
+        .id-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #80868b; margin-bottom: 6px; }
+        .id-value { font-size: 26px; font-weight: 800; color: #1a73e8; letter-spacing: 0.04em; }
+        .id-hint  { font-size: 11px; color: #9aa0a6; margin-top: 4px; }
+
+        /* Body */
+        .body { padding: 28px 40px 36px; }
+
+        /* Badges */
+        .badges-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+        .badge-dept     { background: #e8f0fe; color: #1a73e8; }
+        .badge-priority { color: #fff; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Section Title */
+        .section-title {
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+            color: #80868b; margin: 20px 0 12px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: #f1f3f4; }
+
+        /* Detail Cards */
+        .detail-grid { display: flex; flex-direction: column; gap: 10px; }
+        .detail-item {
+            background: #f8f9fa; border-radius: 12px; padding: 14px 18px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .detail-label { font-size: 11px; font-weight: 600; color: #80868b; text-transform: uppercase; letter-spacing: 0.06em; }
+        .detail-value { font-size: 15px; font-weight: 500; color: #202124; word-break: break-word; }
+
+        /* Office Card */
+        .office-card {
+            background: linear-gradient(135deg, #e3f2fd, #f1f8e9);
+            border: 1.5px solid #1a73e8;
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 4px;
+        }
+        .office-card-title { font-size: 11px; font-weight: 700; color: #1a73e8; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+        .office-name  { font-size: 16px; font-weight: 700; color: #202124; margin-bottom: 4px; }
+        .office-dist  { font-size: 13px; color: #5f6368; }
+
+        /* Map */
+        #map {
+            width: 100%;
+            height: 320px;
+            border-radius: 14px;
+            margin-top: 8px;
+            z-index: 0;
+        }
+
+        /* Action Buttons */
+        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+        .btn {
+            display: block; width: 100%; padding: 14px; border-radius: 12px;
+            font-size: 15px; font-weight: 700; text-align: center;
+            text-decoration: none; cursor: pointer; border: none;
+            transition: opacity 0.18s, transform 0.1s;
+        }
+        .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-track { background: linear-gradient(135deg,#1a73e8,#4285f4); color:#fff; }
+        .btn-dash  { background: #e8f0fe; color: #1a73e8; }
+        .btn-home  { background: #f1f3f4; color: #5f6368; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 28px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #202124; color: #fff;
+            padding: 14px 24px; border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            z-index: 999; opacity: 0;
+            transition: opacity 0.3s, transform 0.3s; white-space: nowrap;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast">🎉 Complaint submitted successfully!</div>
+
+<div class="card">
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="check-ring">✅</div>
+        <h1>Complaint Successfully Submitted!</h1>
+        <p>Your complaint has been logged and will be reviewed shortly.</p>
+    </div>
+
+    <!-- Complaint ID Strip -->
+    <div class="id-strip">
+        <div class="id-label">Your Complaint ID</div>
+        <div class="id-value">{{ complaint_id }}</div>
+        <div class="id-hint">Save this ID to track your complaint status</div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+
+        <!-- Badges -->
+        <div class="badges-row">
+            <span class="badge badge-dept">🏢 {{ dept }}</span>
+            <span class="badge badge-priority" style="background-color: {{ p_color }};">
+                🔥 {{ priority | upper }} PRIORITY
+            </span>
+        </div>
+
+        <!-- Original Complaint -->
+        <div class="section-title">Original Complaint</div>
+        <div class="detail-item">
+            <span class="detail-value" style="font-style: italic; color: #5f6368;">{{ complaint }}</span>
+        </div>
+
+        <!-- Submitted Details -->
+        <div class="section-title">Submitted Details</div>
+        <div class="detail-grid">
+            {% for label, value in responses.items() %}
+            <div class="detail-item">
+                <span class="detail-label">{{ label }}</span>
+                <span class="detail-value">{{ value }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Nearest Office + Map (only if location was provided) -->
+        {% if assigned_office %}
+        <div class="section-title">📍 Assigned Government Office</div>
+
+        <div class="office-card">
+            <div class="office-card-title">Nearest Office</div>
+            <div class="office-name">🏛️ {{ assigned_office.name }}</div>
+            <div class="office-dist">📏 Distance: {{ assigned_office.distance_km }} km from your location</div>
+        </div>
+
+        <div class="section-title">🗺️ Map View</div>
+        <div id="map"></div>
+
+        <script>
+        (function() {
+            var userLat  = {{ user_lat }};
+            var userLon  = {{ user_lon }};
+            var offLat   = {{ assigned_office.lat }};
+            var offLon   = {{ assigned_office.lon }};
+            var offName  = {{ assigned_office.name | tojson }};
+            var offDist  = {{ assigned_office.distance_km }};
+
+            // Centre map between user and office
+            var midLat   = (userLat + offLat) / 2;
+            var midLon   = (userLon + offLon) / 2;
+
+            var map = L.map('map').setView([midLat, midLon], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // User marker (blue)
+            var userIcon = L.divIcon({
+                html: '<div style="background:#1a73e8;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',
+                className: '', iconAnchor: [8, 8]
+            });
+            L.marker([userLat, userLon], {icon: userIcon})
+                .addTo(map)
+                .bindPopup('<b>📍 Your Location</b>').openPopup();
+
+            // Office marker (red)
+            var offIcon = L.divIcon({
+                html: '<div style="background:#d93025;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',
+                className: '', iconAnchor: [9, 9]
+            });
+            L.marker([offLat, offLon], {icon: offIcon})
+                .addTo(map)
+                .bindPopup('<b>🏛️ ' + offName + '</b><br><small>' + offDist + ' km away</small>');
+
+            // Line connecting user → office
+            L.polyline([[userLat, userLon], [offLat, offLon]], {
+                color: '#1a73e8', weight: 3, dashArray: '8, 6', opacity: 0.8
+            }).addTo(map);
+
+            // Fit both markers in view
+            map.fitBounds([[userLat, userLon], [offLat, offLon]], {padding: [40, 40]});
+        })();
+        </script>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="btn-group">
+            <a href="/track/{{ complaint_id }}" class="btn btn-track">🔍 Track My Complaint</a>
+            <a href="/dashboard" class="btn btn-dash">📊 Go to Analytics Dashboard</a>
+            <a href="/" class="btn btn-home">🏠 Submit Another Complaint</a>
+        </div>
+
+    </div><!-- /body -->
+</div>
+
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(function() { t.classList.remove('show'); }, 3500);
+        }, 600);
+    });
+</script>
+
+</body>
+</html>

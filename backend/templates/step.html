@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step {{ step_num }} – {{ step }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e8f0fe 0%, #e8f5e9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 16px 60px;
+        }
+
+        /* Card */
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(26,115,232,0.12);
+            width: 100%;
+            max-width: 560px;
+            padding: 36px 40px 40px;
+            animation: slideIn 0.35s cubic-bezier(.22,.61,.36,1) both;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Top Meta Row */
+        .meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .step-counter {
+            font-size: 12px;
+            font-weight: 600;
+            color: #80868b;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* Progress Bar */
+        .progress-wrap { margin-bottom: 26px; }
+        .progress-track {
+            background: #e8eaed;
+            border-radius: 999px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1a73e8, #4285f4);
+            border-radius: 999px;
+            transition: width 0.5s ease;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #9aa0a6;
+            margin-top: 6px;
+        }
+
+        /* Step Title */
+        .step-title {
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: #202124;
+            margin-bottom: 18px;
+        }
+
+        /* Complaint Chip */
+        .complaint-chip {
+            background: #f8f9fa;
+            border-left: 4px solid #1a73e8;
+            border-radius: 0 10px 10px 0;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #3c4043;
+            font-style: italic;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .complaint-chip strong {
+            display: block;
+            font-style: normal;
+            color: #1a73e8;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+        }
+
+        /* AI Suggestion Box */
+        .ai-box {
+            background: linear-gradient(135deg, #e8f5e9, #f1f8fe);
+            border: 1.5px solid #34a853;
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+        }
+        .ai-box-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #188038;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+        .ai-suggestion-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #202124;
+            line-height: 1.5;
+        }
+        .ai-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .btn-use {
+            flex: 1;
+            padding: 9px 14px;
+            background: #34a853;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .btn-use:hover { background: #2d8e47; transform: translateY(-1px); }
+        .btn-edit-ai {
+            flex: 1;
+            padding: 9px 14px;
+            background: #fff;
+            color: #1a73e8;
+            border: 1.5px solid #1a73e8;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .btn-edit-ai:hover { background: #e8f0fe; transform: translateY(-1px); }
+
+        /* Editable field area */
+        .field-area { margin-bottom: 4px; }
+        .field-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #5f6368;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: block;
+            margin-bottom: 6px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #dadce0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: #202124;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
+        }
+        textarea { resize: vertical; min-height: 100px; }
+        input[type="file"] { width: 100%; margin-top: 8px; font-size: 14px; }
+
+        /* Datalists styling handled by browser */
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #1a73e8, #4285f4);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 22px;
+            transition: opacity 0.18s, transform 0.1s;
+            letter-spacing: 0.02em;
+            position: relative;
+        }
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: 0.6; cursor: wait; }
+
+        /* Mini loading overlay on submit */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(3px);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        .loading-overlay.show { display: flex; }
+        .spinner {
+            width: 44px; height: 44px;
+            border: 4px solid #e8eaed;
+            border-top-color: #1a73e8;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a73e8;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading overlay (shown between steps) -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">🤖 Analyzing complaint…</div>
+</div>
+
+<div class="card">
+
+    <!-- Meta Row -->
+    <div class="meta-row">
+        <span class="step-counter">Step {{ step_num }} of {{ total_steps }}</span>
+        <span class="priority-badge" style="background-color: {{ p_color }};">
+            🔥 {{ priority }} Priority
+        </span>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-wrap">
+        <div class="progress-track">
+            <div class="progress-fill" style="width: {{ (step_num / total_steps * 100)|round|int }}%;"></div>
+        </div>
+        <div class="progress-label">
+            <span>Progress</span>
+            <span>{{ (step_num / total_steps * 100)|round|int }}%</span>
+        </div>
+    </div>
+
+    <!-- Step Title -->
+    <h1 class="step-title">{{ step }}</h1>
+
+    <!-- Original Complaint -->
+    <div class="complaint-chip">
+        <strong>Original Complaint</strong>
+        {{ complaint }}
+    </div>
+
+    <!-- ═══ FORM ═══ -->
+    <form action="/step" method="POST" enctype="multipart/form-data" id="stepForm">
+
+        {# ── UPLOAD STEP ── #}
+        {% if "Upload" in step or "Proof" in step %}
+            <div class="field-area">
+                <span class="field-label">📎 Upload Required File</span>
+                <input type="file" name="file">
+            </div>
+
+        {# ── STEPS WITH AI SUGGESTION ── #}
+        {% elif suggested_value and suggested_value != 'Not specified' and suggested_value != '' %}
+
+            <!-- AI Suggestion Box -->
+            <div class="ai-box" id="aiBox">
+                <div class="ai-box-label">🤖 AI Suggested Data</div>
+                <div class="ai-suggestion-text">{{ suggested_value }}</div>
+                <div class="ai-actions">
+                    <button type="button" class="btn-use" onclick="useAISuggestion()">
+                        ✅ Use Suggestion
+                    </button>
+                    <button type="button" class="btn-edit-ai" onclick="editManually()">
+                        ✏️ Edit Manually
+                    </button>
+                </div>
+            </div>
+
+            <!-- Single response field — pre-filled with AI suggestion, submitted always -->
+            <div class="field-area" id="fieldArea" style="display:none;">
+                <span class="field-label">Your Answer</span>
+
+                {% if "Description" in step or "Details" in step %}
+                    <textarea name="response" id="responseField"
+                        placeholder="Type your answer here…">{{ suggested_value }}</textarea>
+
+                {% elif "Location" in step %}
+                    <datalist id="locList">
+                        <option value="Anna Nagar, Chennai">
+                        <option value="T. Nagar, Chennai">
+                        <option value="Adyar, Chennai">
+                        <option value="Velachery, Chennai">
+                        <option value="Tambaram, Chennai">
+                        <option value="Porur, Chennai">
+                        <option value="Ambattur, Chennai">
+                        <option value="Perambur, Chennai">
+                        <option value="Guindy, Chennai">
+                        <option value="Chromepet, Chennai">
+                        <option value="Mylapore, Chennai">
+                        <option value="Nungambakkam, Chennai">
+                        <option value="Kodambakkam, Chennai">
+                        <option value="Sholinganallur, Chennai">
+                        <option value="Coimbatore, Tamil Nadu">
+                        <option value="Madurai, Tamil Nadu">
+                        <option value="Tiruchirappalli, Tamil Nadu">
+                        <option value="Salem, Tamil Nadu">
+                        <option value="Tirunelveli, Tamil Nadu">
+                    </datalist>
+                    <input type="text" name="response" id="responseField"
+                        list="locList" value="{{ suggested_value }}"
+                        placeholder="Start typing a location…">
+
+                {% elif "Issue Type" in step or "Violation Type" in step or "Complaint Type" in step %}
+                    <datalist id="issueList">
+                        <option value="Card Blocked">
+                        <option value="Unauthorized Transaction">
+                        <option value="Account Fraud">
+                        <option value="Loan Dispute">
+                        <option value="Pothole / Road Damage">
+                        <option value="Illegal Parking">
+                        <option value="Traffic Violation">
+                        <option value="Garbage Not Collected">
+                        <option value="Graffiti / Vandalism">
+                        <option value="Damaged Infrastructure">
+                        <option value="Water Leakage">
+                        <option value="Power Outage">
+                        <option value="Street Light Not Working">
+                        <option value="Drainage Overflow">
+                        <option value="Noise Complaint">
+                    </datalist>
+                    <input type="text" name="response" id="responseField"
+                        list="issueList" value="{{ suggested_value }}"
+                        placeholder="Select or type an issue type…">
+
+                {% else %}
+                    <input type="text" name="response" id="responseField"
+                        value="{{ suggested_value }}"
+                        placeholder="Enter {{ step }}…">
+                {% endif %}
+            </div>
+
+            <!-- Hidden field: carries AI suggestion value when user clicks "Use Suggestion" -->
+            <input type="hidden" name="response" id="hiddenAI" value="{{ suggested_value }}" disabled>
+
+        {# ── NO AI — Plain Manual Entry with step-specific prompts ── #}
+        {% else %}
+            <!-- Required field notice -->
+            <div style="background:#fff3cd;border:1px solid #f9ab00;border-radius:10px;padding:11px 15px;margin-bottom:14px;font-size:13px;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:16px;">⚠️</span>
+                <span style="color:#856404;font-weight:600;">This information could not be extracted automatically. Please fill it in below.</span>
+            </div>
+            <div class="field-area">
+                <span class="field-label">{{ step }} <span style="color:#d93025;">*</span></span>
+
+                {% if "Description" in step or "Details" in step %}
+                    <textarea name="response" rows="4" required
+                        placeholder="Please describe the issue clearly — include what happened, when, and any other relevant details…"></textarea>
+
+                {% elif "Vehicle Details" in step %}
+                    <input type="text" name="response" required
+                        placeholder="Enter vehicle registration number, make & model — e.g. TN 01 AB 1234 – Maruti Swift">
+
+                {% elif "Customer Details" in step %}
+                    <input type="text" name="response" required
+                        placeholder="Enter your name and account / card number — e.g. John Doe, Acc: 12345678">
+
+                {% elif "Transaction Details" in step %}
+                    <input type="text" name="response" required
+                        placeholder="Enter amount, date and transaction reference — e.g. ₹5000, 01-Apr-2026, Ref: TXN123">
+
+                {% elif "Time of Incident" in step %}
+                    <input type="text" name="response" required
+                        placeholder="Enter date/time of incident — e.g. 01-Apr-2026 at 3:30 PM">
+
+                {% elif "Location" in step %}
+                    <datalist id="locList2">
+                        <option value="Anna Nagar, Chennai">
+                        <option value="T. Nagar, Chennai">
+                        <option value="Adyar, Chennai">
+                        <option value="Velachery, Chennai">
+                        <option value="Tambaram, Chennai">
+                        <option value="Porur, Chennai">
+                        <option value="Ambattur, Chennai">
+                        <option value="Guindy, Chennai">
+                        <option value="Chromepet, Chennai">
+                        <option value="Mylapore, Chennai">
+                        <option value="Coimbatore, Tamil Nadu">
+                        <option value="Madurai, Tamil Nadu">
+                        <option value="Tiruchirappalli, Tamil Nadu">
+                    </datalist>
+                    <input type="text" name="response" list="locList2" required
+                        placeholder="Enter the area, street or landmark — e.g. Near Anna Nagar Arch, Chennai">
+
+                {% elif "Issue Type" in step or "Violation Type" in step or "Complaint Type" in step %}
+                    <datalist id="issueList2">
+                        <option value="Card Blocked"><option value="Unauthorized Transaction">
+                        <option value="Pothole / Road Damage"><option value="Illegal Parking">
+                        <option value="Garbage Not Collected"><option value="Graffiti / Vandalism">
+                        <option value="Damaged Infrastructure"><option value="Water Leakage">
+                        <option value="Signal Jumping"><option value="Wrong Parking">
+                    </datalist>
+                    <input type="text" name="response" list="issueList2" required
+                        placeholder="Describe the issue type — e.g. Pothole, Card Blocked, Garbage Overflow">
+
+                {% elif "Severity" in step or "Risk Level" in step %}
+                    <select name="response" required style="width:100%;padding:12px 14px;border:1.5px solid #dadce0;border-radius:10px;font-size:14px;font-family:inherit;color:#202124;background:#fff;outline:none;">
+                        <option value="" disabled selected>Select severity level…</option>
+                        <option value="High">🔴 High — Immediate action required</option>
+                        <option value="Medium">🟡 Medium — Needs attention soon</option>
+                        <option value="Low">🟢 Low — Routine issue</option>
+                    </select>
+
+                {% elif "Frequency" in step %}
+                    <select name="response" required style="width:100%;padding:12px 14px;border:1.5px solid #dadce0;border-radius:10px;font-size:14px;font-family:inherit;color:#202124;background:#fff;outline:none;">
+                        <option value="" disabled selected>How often does this occur?</option>
+                        <option value="First occurrence">First occurrence</option>
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Ongoing for weeks">Ongoing for weeks</option>
+                    </select>
+
+                {% else %}
+                    <input type="text" name="response" required
+                        placeholder="Please enter {{ step }} here…">
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+            {% if step_num == total_steps %}🏁 Submit Complaint{% else %}Next Step →{% endif %}
+        </button>
+    </form>
+</div>
+
+<script>
+    var aiBox     = document.getElementById('aiBox');
+    var fieldArea = document.getElementById('fieldArea');
+    var hiddenAI  = document.getElementById('hiddenAI');
+    var respField = document.getElementById('responseField');
+
+    // "✅ Use Suggestion" — enable hidden AI field, disable visible field, submit
+    function useAISuggestion() {
+        if (hiddenAI)  { hiddenAI.disabled  = false; }
+        if (respField) { respField.disabled  = true;  }
+        showLoading();
+        document.getElementById('stepForm').submit();
+    }
+
+    // "✏️ Edit Manually" — hide AI box, show editable field, clear pre-fill
+    function editManually() {
+        if (aiBox)     { aiBox.style.display     = 'none'; }
+        if (fieldArea) { fieldArea.style.display  = 'block'; }
+        if (hiddenAI)  { hiddenAI.disabled        = true;  }
+        if (respField) {
+            respField.disabled = false;
+            respField.value    = '';            // clear AI value — user types fresh
+            respField.focus();
+        }
+    }
+
+    // Show loading overlay whenever the form submits
+    function showLoading() {
+        document.getElementById('loadingOverlay').classList.add('show');
+        var btn = document.getElementById('submitBtn');
+        if (btn) btn.disabled = true;
+    }
+
+    // Main submit button click
+    document.getElementById('stepForm').addEventListener('submit', function(e) {
+        // If AI box is still visible (user didn't click either AI button)
+        // auto-use the AI suggestion
+        if (aiBox && aiBox.style.display !== 'none') {
+            e.preventDefault();
+            useAISuggestion();
+            return;
+        }
+        showLoading();
+    });
+</script>
+
+</body>
+</html>

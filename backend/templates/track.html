@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Track Complaint</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #f0f2f5; padding-top: 50px; }
+        .container { background: white; padding: 40px; margin: auto; width: 600px; border-radius: 15px; box-shadow: 0px 10px 30px rgba(0,0,0,0.1); }
+        h1 { color: #1a73e8; margin-bottom: 30px; }
+        .error-message { color: #d93025; font-size: 20px; font-weight: bold; margin-bottom: 20px; }
+        .summary-box { text-align: left; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
+        .item { margin-bottom: 15px; border-bottom: 1px solid #ebebeb; padding-bottom: 10px; }
+        .label { font-weight: bold; color: #5f6368; display: block; margin-bottom: 5px; }
+        .value { color: #333; font-size: 16px; }
+        .id-badge { display: inline-block; padding: 10px 20px; background: #e8f0fe; color: #1a73e8; border-radius: 8px; font-weight: bold; font-size: 20px; margin-bottom: 20px; border: 2px dashed #1a73e8; }
+        .dept-badge { display: inline-block; padding: 5px 15px; background: #e8f0fe; color: #1a73e8; border-radius: 20px; font-weight: bold; margin-bottom: 20px; }
+        .status-badge { display: inline-block; padding: 8px 20px; color: white; border-radius: 20px; font-weight: bold; margin-bottom: 20px; font-size: 18px; }
+        button { padding: 12px 30px; background: #34a853; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; text-decoration: none; width: 100%; }
+        button:hover { background: #2d8e47; }
+        a { text-decoration: none; color: white; display: block; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        {% if error %}
+            <h1 style="color: #d93025;">⚠️ Error</h1>
+            <div class="error-message">{{ error }}</div>
+        {% else %}
+            <h1>📍 Complaint Tracking Status</h1>
+            
+            <div class="id-badge">ID: {{ complaint.complaint_id }}</div>
+            
+            <br>
+            <div class="status-badge" style="background-color: {{ complaint.status_color }};">
+                Status: {{ complaint.status }}
+            </div>
+            
+            <div class="dept-badge">{{ complaint.department }}</div>
+            
+            <div class="summary-box">
+                <div class="item">
+                    <span class="label">Priority Level:</span>
+                    <span class="value" style="color: {{ complaint.p_color }}; font-weight: bold;">{{ complaint.priority | upper }}</span>
+                </div>
+                <div class="item">
+                    <span class="label">Submitted Document:</span>
+                    <span class="value">{{ complaint.complaint_text }}</span>
+                </div>
+                
+                <h3 style="margin-top: 20px; color: #1a73e8;">Filled Details:</h3>
+                {% for label, value in complaint.steps_data.items() %}
+                    <div class="item" style="border-bottom: 1px dotted #ccc;">
+                        <span class="label" style="font-size: 14px;">{{ label }}:</span>
+                        <span class="value">{{ value }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <br>
+        <button><a href="/">Return Home</a></button>
+    </div>
+
+</body>
+</html>

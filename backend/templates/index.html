@@ -359,6 +359,55 @@
                 document.getElementById('imageDocsName').style.color = '#2563eb';
             }
         };
+
+        // ─── GPS & Geocode helpers for Location Capture ─────────────────
+        function getGPS(suffix) {
+            var statusEl = document.getElementById('locStatus' + suffix);
+            statusEl.textContent = '📡 Detecting GPS...';
+            statusEl.style.color = '#1a73e8';
+            if (!navigator.geolocation) {
+                statusEl.textContent = '❌ GPS not supported. Use manual input.';
+                statusEl.style.color = '#d93025';
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    var lat = pos.coords.latitude.toFixed(6);
+                    var lon = pos.coords.longitude.toFixed(6);
+                    document.getElementById('userLat' + suffix).value = lat;
+                    document.getElementById('userLon' + suffix).value = lon;
+                    statusEl.textContent = '✅ Location captured: ' + lat + ', ' + lon;
+                    statusEl.style.color = '#188038';
+                },
+                function(err) {
+                    statusEl.textContent = '⚠️ GPS denied. Please enter location manually.';
+                    statusEl.style.color = '#f9ab00';
+                },
+                {timeout: 8000, maximumAge: 60000}
+            );
+        }
+
+        function geocodeAddr(suffix) {
+            var query = document.getElementById('manualLoc' + suffix).value.trim();
+            var statusEl = document.getElementById('locStatus' + suffix);
+            if (!query) { statusEl.textContent = 'Please enter a location.'; return; }
+            statusEl.textContent = '🔍 Looking up address...';
+            statusEl.style.color = '#1a73e8';
+            fetch('/geocode?q=' + encodeURIComponent(query))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.lat && data.lon) {
+                        document.getElementById('userLat' + suffix).value = data.lat;
+                        document.getElementById('userLon' + suffix).value = data.lon;
+                        statusEl.textContent = '✅ Found: ' + (data.display ? data.display.split(',').slice(0,3).join(', ') : data.lat + ', ' + data.lon);
+                        statusEl.style.color = '#188038';
+                    } else {
+                        statusEl.textContent = '❌ Could not find location. Try another search.';
+                        statusEl.style.color = '#d93025';
+                    }
+                })
+                .catch(() => { statusEl.textContent = '❌ Geocoding failed.'; statusEl.style.color = '#d93025'; });
+        }
     </script>
 
 </body>

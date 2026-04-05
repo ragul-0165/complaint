@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard – AI Complaint System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        .header h1 {
+            font-size: 2rem;
+            color: #1a73e8;
+            font-weight: 700;
+        }
+        .header p {
+            color: #5f6368;
+            margin-top: 6px;
+            font-size: 15px;
+        }
+        .total-badge {
+            display: inline-block;
+            background: #1a73e8;
+            color: white;
+            padding: 8px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        .nav-bar {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .nav-bar a {
+            display: inline-block;
+            padding: 9px 22px;
+            background: #fff;
+            color: #1a73e8;
+            border: 2px solid #1a73e8;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .nav-bar a:hover { background: #1a73e8; color: white; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            padding: 28px;
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            color: #202124;
+            margin-bottom: 20px;
+            font-weight: 600;
+            border-left: 4px solid #1a73e8;
+            padding-left: 10px;
+        }
+        .chart-wrap {
+            position: relative;
+            height: 280px;
+        }
+        .no-data {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .no-data h2 { color: #9aa0a6; font-size: 1.3rem; margin-top: 16px; }
+        .no-data p { color: #bdc1c6; margin-top: 8px; }
+        .no-data a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 28px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>📊 Analytics Dashboard</h1>
+    <p>Real-time insights from the AI Complaint System</p>
+    {% if not no_data %}
+        <span class="total-badge">Total Complaints: {{ analytics.total }}</span>
+    {% endif %}
+</div>
+
+<div class="nav-bar">
+    <a href="/">← Back to Home</a>
+</div>
+
+{% if no_data %}
+<div class="no-data">
+    <div style="font-size: 4rem;">🗂️</div>
+    <h2>No Complaints Available</h2>
+    <p>Submit your first complaint to see analytics here.</p>
+    <a href="/">Submit a Complaint</a>
+</div>
+{% else %}
+
+<div class="grid">
+
+    <!-- Chart 1: Complaints by Department (Bar) -->
+    <div class="card">
+        <h2>Complaints by Department</h2>
+        <div class="chart-wrap">
+            <canvas id="deptChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 2: Priority Distribution (Pie) -->
+    <div class="card">
+        <h2>Priority Distribution</h2>
+        <div class="chart-wrap">
+            <canvas id="priorityChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 3: Status Overview (Doughnut) -->
+    <div class="card">
+        <h2>Status Overview</h2>
+        <div class="chart-wrap">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ─── Data from Flask Backend ─────────────────────────────
+    const deptData   = {{ analytics.departments | tojson }};
+    const prioData   = {{ analytics.priority    | tojson }};
+    const statusData = {{ analytics.status      | tojson }};
+
+    // ─── Shared Chart Options ────────────────────────────────
+    const legendOpts = { position: 'bottom', labels: { padding: 16, font: { size: 12 } } };
+
+    // ─── 1. Bar Chart – Departments ─────────────────────────
+    new Chart(document.getElementById('deptChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(deptData),
+            datasets: [{
+                label: 'Number of Complaints',
+                data: Object.values(deptData),
+                backgroundColor: [
+                    '#4285F4','#34A853','#FBBC05','#EA4335',
+                    '#8AB4F8','#81C995','#FDD663','#F28B82'
+                ],
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} complaint(s)` } }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f3f4' } },
+                x: { ticks: { maxRotation: 30, font: { size: 11 } } }
+            }
+        }
+    });
+
+    // ─── 2. Pie Chart – Priority ─────────────────────────────
+    new Chart(document.getElementById('priorityChart'), {
+        type: 'pie',
+        data: {
+            labels: ['High', 'Medium', 'Low'],
+            datasets: [{
+                data: [prioData.High, prioData.Medium, prioData.Low],
+                backgroundColor: ['#d93025', '#f9ab00', '#188038'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: legendOpts,
+                tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} complaints` } }
+            }
+        }
+    });
+
+    // ─── 3. Doughnut Chart – Status ──────────────────────────
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Submitted', 'In Progress', 'Resolved'],
+            datasets: [{
+                data: [statusData.Submitted, statusData['In Progress'], statusData.Resolved],
+                backgroundColor: ['#1a73e8', '#f9ab00', '#188038'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: legendOpts,
+                tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} complaints` } }
+            }
+        }
+    });
+</script>
+
+{% endif %}
+</body>
+</html>
